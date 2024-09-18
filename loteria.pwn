@@ -1,7 +1,3 @@
-new gLotteryPlayers[MAX_PLAYERS];
-new gTotalPlayers = 0;
-new gLotteryPrize = 5000;
-
 CMD:loteria(playerid) {
     if (gLotteryPlayers[playerid]) {
         return SendClientMessage(playerid, -1, "Você já está participando da loteria!");
@@ -31,8 +27,8 @@ public SorteioLoteria() {
     new winner = GetRandomPlayer();
     if (winner != INVALID_PLAYER_ID) {
         GivePlayerMoney(winner, gLotteryPrize);
-        SendClientMessageToAll(-1, "Parabéns ao vencedor da loteria!");
-        SendClientMessage(winner, -1, "Você ganhou a loteria e recebeu seu prêmio!");
+        format(str, sizeof(str), "Parabéns %s, você ganhou a loteria e recebeu %i de prêmio!", GetPlayerName(winner), gLotteryPrize);
+        SendClientMessageToAll(-1, str);
         ResetLottery();
     }
 
@@ -40,12 +36,18 @@ public SorteioLoteria() {
 }
 
 GetRandomPlayer() {
-    new randomPlayer;
-    do {
-        randomPlayer = random(MAX_PLAYERS);
-    } while (!IsPlayerConnected(randomPlayer) || !gLotteryPlayers[randomPlayer]);
+    if (gTotalPlayers == 0) {
+        return INVALID_PLAYER_ID;
+    }
 
-    return randomPlayer;
+    new randomPlayer;
+    for (new i = 0; i < 100; i++) {
+        randomPlayer = random(MAX_PLAYERS);
+        if (IsPlayerConnected(randomPlayer) && gLotteryPlayers[randomPlayer]) {
+            return randomPlayer;
+        }
+    }
+    return INVALID_PLAYER_ID;
 }
 
 ResetLottery() {
